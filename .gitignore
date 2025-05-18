@@ -38,3 +38,8 @@ dist
 /turtle-soup
 
 .DS_Store
+.jzero.yaml
+etc.yaml
+*.pid
+turtle_soup_go
+example/

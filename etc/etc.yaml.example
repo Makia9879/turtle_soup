@@ -1,0 +1,14 @@
+rest:
+    name: turtle-soup-api
+    host: 0.0.0.0
+    port: 8001
+
+log:
+    encoding: plain
+
+mysql:
+    db_name: turtle_soup
+    username: turtle_soup
+    password:
+    ip: 127.0.0.1
+    port: 3306
