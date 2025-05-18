@@ -33,4 +33,5 @@ redis:
 
 
 activeTokenExpire: 3600  # 秒
+sessionTokenExpire: 1200  # 秒
 
