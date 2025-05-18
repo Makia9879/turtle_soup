@@ -1,28 +1,52 @@
 package svc
 
 import (
+	"fmt"
+	"turtle-soup/internal/model"
+
+	configurator "github.com/zeromicro/go-zero/core/configcenter"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+
 	"turtle-soup/internal/config"
 	"turtle-soup/internal/custom"
 	"turtle-soup/internal/middleware"
-
-	configurator "github.com/zeromicro/go-zero/core/configcenter"
 )
 
 type ServiceContext struct {
 	Config configurator.Configurator[config.Config]
 	middleware.Middleware
-	Custom  *custom.Custom
+	Custom *custom.Custom
+
 	SqlConn sqlx.SqlConn
+	Model   model.Model
 }
 
 func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceContext {
+	cfg, err := cc.GetConfig()
+	logx.Must(err)
+
+	sqlConn, err := initSqlConn(cfg)
+	logx.Must(err)
+
 	sc := &ServiceContext{
 		Config:     cc,
 		Custom:     custom.New(),
 		Middleware: middleware.New(),
-		// TODO SqlConn
+		SqlConn:    sqlConn,
+		Model:      model.NewModel(sqlConn),
 	}
 	sc.SetConfigListener()
 	return sc
+}
+
+func initSqlConn(c config.Config) (sqlx.SqlConn, error) {
+	mysqlCfg := c.MySQLConf
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		mysqlCfg.Username,
+		mysqlCfg.Password,
+		mysqlCfg.IP,
+		mysqlCfg.Port,
+		mysqlCfg.DBName)
+	return sqlx.NewMysql(dsn), nil
 }
