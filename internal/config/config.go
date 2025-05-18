@@ -15,7 +15,10 @@ type Config struct {
 	MySQLConf MySQLConf       `json:"mysql,optional"`
 	RedisConf redis.RedisConf `json:"redis,optional"`
 
-	ActiveTokenExpire int `json:"activeTokenExpire,optional"`
+	ActiveTokenExpire       int `json:"activeTokenExpire,optional"`
+	SessionTokenExpire      int `json:"sessionTokenExpire,optional"`
+	DefaultRemainingTries   int `json:"defaultRemainingTries,optional"`
+	DefaultRemainingAnswers int `json:"defaultRemainingAnswers,optional"`
 }
 
 type RestConf struct {

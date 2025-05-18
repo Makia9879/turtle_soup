@@ -1,20 +1,20 @@
 package turtlesoup
 
 import (
+	"context"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/contextx"
 	"net/http"
 	"strings"
 	"time"
-	"turtle-soup/internal/constant"
-
-	"context"
-
-	"turtle-soup/internal/svc"
-	types "turtle-soup/internal/types/turtlesoup"
 
 	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
+
+	"turtle-soup/internal/constant"
+	"turtle-soup/internal/model/t_activity_tokens"
+	"turtle-soup/internal/svc"
+	types "turtle-soup/internal/types/turtlesoup"
 )
 
 type GetActivityToken struct {
@@ -60,6 +60,14 @@ func (l *GetActivityToken) GetActivityToken(req *types.GetActivityTokenRequest) 
 	token := uuid.New().String()
 	e := time.Duration(l.svcCtx.MustGetConfig().ActiveTokenExpire) * time.Second
 	expireTime := time.Now().Add(e)
+	_, err = l.svcCtx.Model.TActivityTokens.Insert(valCtx, nil, &t_activity_tokens.TActivityTokens{
+		Token:     token,
+		ExpiresAt: expireTime,
+	})
+	if err != nil {
+		l.Logger.Errorf("[GetActivityToken] Insert() error: %v", err)
+		return nil, err
+	}
 
 	// 3. 存储令牌信息 (这里需要根据实际存储方式实现)
 	// 例如使用Redis: err = l.svcCtx.Redis.SetexCtx(l.ctx, "activity_token:"+token, req.ActivityID, 86400)
