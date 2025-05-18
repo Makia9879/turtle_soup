@@ -8,6 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 	"turtle-soup/internal/svc"
 
+	turtlesoup "turtle-soup/internal/handler/turtlesoup"
 	version "turtle-soup/internal/handler/version"
 )
 
@@ -17,6 +18,28 @@ var (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	{
+		server.AddRoutes(
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/activity/token",
+					Handler: turtlesoup.GetActivityToken(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/session/token",
+					Handler: turtlesoup.GetSessionToken(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/submit/answer",
+					Handler: turtlesoup.SubmitAnswer(serverCtx),
+				},
+			},
+			rest.WithPrefix("/api/v1"),
+		)
+	}
 	{
 		server.AddRoutes(
 			[]rest.Route{

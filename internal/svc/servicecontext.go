@@ -2,6 +2,9 @@ package svc
 
 import (
 	"fmt"
+	"github.com/jzero-io/jzero-contrib/cache"
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"turtle-soup/internal/errors"
 	"turtle-soup/internal/model"
 
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
@@ -18,8 +21,10 @@ type ServiceContext struct {
 	middleware.Middleware
 	Custom *custom.Custom
 
-	SqlConn sqlx.SqlConn
-	Model   model.Model
+	SqlConn   sqlx.SqlConn
+	Model     model.Model
+	Cache     cache.Cache
+	RedisConn *redis.Redis
 }
 
 func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceContext {
@@ -29,12 +34,19 @@ func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceCont
 	sqlConn, err := initSqlConn(cfg)
 	logx.Must(err)
 
+	// 初始化 Cache
+	redisConn, err := redis.NewRedis(cfg.RedisConf)
+	logx.Must(err)
+	cacheIns := cache.NewRedisNode(redisConn, errors.ErrCacheNotFound)
+
 	sc := &ServiceContext{
 		Config:     cc,
 		Custom:     custom.New(),
 		Middleware: middleware.New(),
 		SqlConn:    sqlConn,
 		Model:      model.NewModel(sqlConn),
+		Cache:      cacheIns,
+		RedisConn:  redisConn,
 	}
 	sc.SetConfigListener()
 	return sc

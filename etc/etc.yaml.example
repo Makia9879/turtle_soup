@@ -4,11 +4,33 @@ rest:
     port: 8001
 
 log:
-    encoding: plain
+    encoding: json
+    mode: file
+    path: logs
+    level: debug
+    serviceName: turtle-soup
+    keepDays: 7
+    compress: true
 
 mysql:
     db_name: turtle_soup
     username: turtle_soup
     password:
     ip: 127.0.0.1
-    port: 3306
+    port: 13306
+
+redis:
+    host: 127.0.0.1
+    port: 16379
+    pass: ""
+    db: 0     # 默认数据库
+    poolSize: 100  # 连接池大小
+    minIdleConns: 10  # 最小空闲连接数
+    idleTimeout: 300s  # 空闲连接超时时间
+    connTimeout: 500ms  # 连接超时时间
+    readTimeout: 500ms  # 读取超时时间
+    writeTimeout: 500ms  # 写入超时时间
+
+
+activeTokenExpire: 3600  # 秒
+

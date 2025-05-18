@@ -1,0 +1,55 @@
+syntax = "v1"
+
+info (
+	go_package: "turtlesoup"
+)
+
+type (
+	// 获取活动token
+	GetActivityTokenRequest  {}
+	GetActivityTokenResponse {
+		Token      string `json:"token"`
+		ExpireTime int64  `json:"expireTime"`
+	}
+	// 获取会话token
+	GetSessionTokenRequest {
+		ActivityToken string `json:"activityToken"`
+	}
+	GetSessionTokenResponse {
+		Token            string `json:"token"`
+		RemainingTries   int    `json:"remainingTries"`
+		RemainingAnswers int    `json:"remainingAnswers"`
+		StoryTitle       string `json:"storyTitle"`
+	}
+	// 提交解答
+	SubmitAnswerRequest {
+		SessionToken string   `json:"sessionToken"`
+		Messages     []string `json:"messages"` // 聊天记录
+	}
+	SubmitAnswerResponse {
+		Reply          string `json:"reply"`
+		IsCorrect      bool   `json:"isCorrect"`
+		RemainingTries int    `json:"remainingTries"`
+		StoryAnswer    string `json:"storyAnswer,optional"` // 仅当解答正确时返回
+		NewStoryTitle  string `json:"newStoryTitle,optional"` // 仅当需要开启新故事时返回
+	}
+)
+
+@server (
+	prefix: /api/v1
+	group:  turtlesoup
+)
+service turtleSoup {
+	// 获取活动token
+	@handler GetActivityToken
+	get /activity/token (GetActivityTokenRequest) returns (GetActivityTokenResponse)
+
+	// 获取会话token和第一个故事
+	@handler GetSessionToken
+	post /session/token (GetSessionTokenRequest) returns (GetSessionTokenResponse)
+
+	// 提交解答
+	@handler SubmitAnswer
+	post /submit/answer (SubmitAnswerRequest) returns (SubmitAnswerResponse)
+}
+

@@ -1,0 +1,214 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/activity/token": {
+      "get": {
+        "operationId": "GetActivityToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetActivityTokenResponse"
+            }
+          }
+        },
+        "tags": [
+          "turtlesoup"
+        ]
+      }
+    },
+    "/api/v1/session/token": {
+      "post": {
+        "operationId": "GetSessionToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetSessionTokenResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 获取会话token",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetSessionTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "turtlesoup"
+        ],
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
+    "/api/v1/submit/answer": {
+      "post": {
+        "operationId": "SubmitAnswer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SubmitAnswerResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 提交解答",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubmitAnswerRequest"
+            }
+          }
+        ],
+        "tags": [
+          "turtlesoup"
+        ],
+        "consumes": [
+          "application/json"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "GetActivityTokenRequest": {
+      "type": "object",
+      "title": "GetActivityTokenRequest"
+    },
+    "GetActivityTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "expireTime": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "GetActivityTokenResponse",
+      "required": [
+        "token",
+        "expireTime"
+      ]
+    },
+    "GetSessionTokenRequest": {
+      "type": "object",
+      "properties": {
+        "activityToken": {
+          "type": "string"
+        }
+      },
+      "title": "GetSessionTokenRequest",
+      "required": [
+        "activityToken"
+      ]
+    },
+    "GetSessionTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "remainingTries": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "remainingAnswers": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "storyTitle": {
+          "type": "string"
+        }
+      },
+      "title": "GetSessionTokenResponse",
+      "required": [
+        "token",
+        "remainingTries",
+        "remainingAnswers",
+        "storyTitle"
+      ]
+    },
+    "SubmitAnswerRequest": {
+      "type": "object",
+      "properties": {
+        "sessionToken": {
+          "type": "string"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " 聊天记录"
+        }
+      },
+      "title": "SubmitAnswerRequest",
+      "required": [
+        "sessionToken",
+        "messages"
+      ]
+    },
+    "SubmitAnswerResponse": {
+      "type": "object",
+      "properties": {
+        "reply": {
+          "type": "string"
+        },
+        "isCorrect": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "remainingTries": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "storyAnswer": {
+          "type": "string",
+          "description": " 仅当解答正确时返回"
+        },
+        "newStoryTitle": {
+          "type": "string",
+          "description": " 仅当需要开启新故事时返回"
+        }
+      },
+      "title": "SubmitAnswerResponse",
+      "required": [
+        "reply",
+        "isCorrect",
+        "remainingTries"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

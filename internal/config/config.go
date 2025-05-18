@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -11,7 +12,10 @@ type Config struct {
 
 	Banner BannerConf
 
-	MySQLConf MySQLConf `json:"mysql,optional"`
+	MySQLConf MySQLConf       `json:"mysql,optional"`
+	RedisConf redis.RedisConf `json:"redis,optional"`
+
+	ActiveTokenExpire int `json:"activeTokenExpire,optional"`
 }
 
 type RestConf struct {
