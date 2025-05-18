@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  run:local:
+    desc: 本地运行服务
+    cmds:
+      - ./stop.sh
+      - go build -o turtle_soup_go main.go
+      - chmod a+x turtle_soup_go
+      - ./start.sh
