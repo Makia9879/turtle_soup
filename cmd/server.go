@@ -2,10 +2,6 @@ package cmd
 
 import (
 	"os"
-	"turtle-soup/internal/config"
-	"turtle-soup/internal/handler"
-	"turtle-soup/internal/middleware"
-	"turtle-soup/internal/svc"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/jzero-io/jzero-contrib/dynamic_conf"
@@ -14,6 +10,12 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/rest"
+
+	"turtle-soup/internal/config"
+	"turtle-soup/internal/global"
+	"turtle-soup/internal/handler"
+	"turtle-soup/internal/middleware"
+	"turtle-soup/internal/svc"
 )
 
 // serverCmd represents the server command
@@ -39,6 +41,8 @@ var serverCmd = &cobra.Command{
 		}
 
 		svcCtx := svc.NewServiceContext(cc)
+		global.SvcCtx = svcCtx
+
 		run(svcCtx)
 	},
 }
