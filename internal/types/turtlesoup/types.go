@@ -25,7 +25,9 @@ type GetSessionTokenResponse struct {
 	Token            string `json:"token"`
 	RemainingTries   int    `json:"remainingTries"`
 	RemainingAnswers int    `json:"remainingAnswers"`
+	StoryID          int    `json:"storyId"`
 	StoryTitle       string `json:"storyTitle"`
+	Surface          string `json:"surface"`
 }
 
 type SubmitAnswerRequest struct {

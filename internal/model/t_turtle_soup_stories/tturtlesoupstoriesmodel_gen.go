@@ -22,8 +22,8 @@ import (
 var (
 	tTurtleSoupStoriesFieldNames          = builder.RawFieldNames(&TTurtleSoupStories{})
 	tTurtleSoupStoriesRows                = strings.Join(tTurtleSoupStoriesFieldNames, ",")
-	tTurtleSoupStoriesRowsExpectAutoSet   = strings.Join(stringx.Remove(tTurtleSoupStoriesFieldNames, "`id`"), ",")
-	tTurtleSoupStoriesRowsWithPlaceHolder = strings.Join(stringx.Remove(tTurtleSoupStoriesFieldNames, "`id`"), "=?,") + "=?"
+	tTurtleSoupStoriesRowsExpectAutoSet   = strings.Join(stringx.Remove(tTurtleSoupStoriesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	tTurtleSoupStoriesRowsWithPlaceHolder = strings.Join(stringx.Remove(tTurtleSoupStoriesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
 	cacheTTurtleSoupStoriesIdPrefix = "cache:tTurtleSoupStories:id:"
 )
@@ -57,8 +57,8 @@ type (
 	TTurtleSoupStories struct {
 		Id        uint64    `db:"id"`
 		Title     string    `db:"title"`
-		Content   string    `db:"content"`
-		Answer    string    `db:"answer"`
+		Surface   string    `db:"surface"`
+		Bottom    string    `db:"bottom"`
 		CreatedAt time.Time `db:"created_at"`
 	}
 )
@@ -153,7 +153,7 @@ func (m *defaultTTurtleSoupStoriesModel) Insert(ctx context.Context, session sql
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tTurtleSoupStoriesRowsExpectAutoSet).
-		Values(data.Title, data.Content, data.Answer, data.CreatedAt).Build()
+		Values(data.Title, data.Surface, data.Bottom).Build()
 	if session != nil {
 		return session.ExecCtx(ctx, statement, args...)
 	}
@@ -165,7 +165,7 @@ func (m *defaultTTurtleSoupStoriesModel) InsertWithCache(ctx context.Context, se
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tTurtleSoupStoriesRowsExpectAutoSet).
-		Values(data.Title, data.Content, data.Answer, data.CreatedAt).Build()
+		Values(data.Title, data.Surface, data.Bottom).Build()
 	return m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		if session != nil {
 			return session.ExecCtx(ctx, statement, args...)
@@ -186,9 +186,9 @@ func (m *defaultTTurtleSoupStoriesModel) Update(ctx context.Context, session sql
 
 	var err error
 	if session != nil {
-		_, err = session.ExecCtx(ctx, statement, data.Title, data.Content, data.Answer, data.CreatedAt, data.Id)
+		_, err = session.ExecCtx(ctx, statement, data.Title, data.Surface, data.Bottom, data.Id)
 	} else {
-		_, err = m.conn.ExecCtx(ctx, statement, data.Title, data.Content, data.Answer, data.CreatedAt, data.Id)
+		_, err = m.conn.ExecCtx(ctx, statement, data.Title, data.Surface, data.Bottom, data.Id)
 	}
 	return err
 }
@@ -206,9 +206,9 @@ func (m *defaultTTurtleSoupStoriesModel) UpdateWithCache(ctx context.Context, se
 		sb.Where(sb.EQ("`id`", nil))
 		statement, _ := sb.Build()
 		if session != nil {
-			return session.ExecCtx(ctx, statement, data.Title, data.Content, data.Answer, data.CreatedAt, data.Id)
+			return session.ExecCtx(ctx, statement, data.Title, data.Surface, data.Bottom, data.Id)
 		}
-		return conn.ExecCtx(ctx, statement, data.Title, data.Content, data.Answer, data.CreatedAt, data.Id)
+		return conn.ExecCtx(ctx, statement, data.Title, data.Surface, data.Bottom, data.Id)
 	}, tTurtleSoupStoriesIdKey)
 	return err
 }
@@ -232,7 +232,7 @@ func (m *customTTurtleSoupStoriesModel) BulkInsert(ctx context.Context, session 
 	sb := sqlbuilder.InsertInto(m.table)
 	sb.Cols(tTurtleSoupStoriesRowsExpectAutoSet)
 	for _, data := range datas {
-		sb.Values(data.Title, data.Content, data.Answer, data.CreatedAt)
+		sb.Values(data.Title, data.Surface, data.Bottom)
 	}
 	statement, args := sb.Build()
 

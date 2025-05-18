@@ -22,8 +22,8 @@ import (
 var (
 	tUserSessionsFieldNames          = builder.RawFieldNames(&TUserSessions{})
 	tUserSessionsRows                = strings.Join(tUserSessionsFieldNames, ",")
-	tUserSessionsRowsExpectAutoSet   = strings.Join(stringx.Remove(tUserSessionsFieldNames, "`id`"), ",")
-	tUserSessionsRowsWithPlaceHolder = strings.Join(stringx.Remove(tUserSessionsFieldNames, "`id`"), "=?,") + "=?"
+	tUserSessionsRowsExpectAutoSet   = strings.Join(stringx.Remove(tUserSessionsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	tUserSessionsRowsWithPlaceHolder = strings.Join(stringx.Remove(tUserSessionsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
 	cacheTUserSessionsIdPrefix = "cache:tUserSessions:id:"
 )
@@ -55,12 +55,12 @@ type (
 	}
 
 	TUserSessions struct {
-		Id             uint64        `db:"id"`
-		SessionTokenId sql.NullInt64 `db:"session_token_id"`
-		StoryId        sql.NullInt64 `db:"story_id"`
-		IsCompleted    int64         `db:"is_completed"`
-		CompletedAt    sql.NullTime  `db:"completed_at"`
-		CreatedAt      time.Time     `db:"created_at"`
+		Id           uint64       `db:"id"`
+		SessionToken string       `db:"session_token"`
+		StoryId      int64        `db:"story_id"`
+		IsCompleted  int64        `db:"is_completed"`
+		CompletedAt  sql.NullTime `db:"completed_at"`
+		CreatedAt    time.Time    `db:"created_at"`
 	}
 )
 
@@ -154,7 +154,7 @@ func (m *defaultTUserSessionsModel) Insert(ctx context.Context, session sqlx.Ses
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tUserSessionsRowsExpectAutoSet).
-		Values(data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt).Build()
+		Values(data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt).Build()
 	if session != nil {
 		return session.ExecCtx(ctx, statement, args...)
 	}
@@ -166,7 +166,7 @@ func (m *defaultTUserSessionsModel) InsertWithCache(ctx context.Context, session
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tUserSessionsRowsExpectAutoSet).
-		Values(data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt).Build()
+		Values(data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt).Build()
 	return m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		if session != nil {
 			return session.ExecCtx(ctx, statement, args...)
@@ -187,9 +187,9 @@ func (m *defaultTUserSessionsModel) Update(ctx context.Context, session sqlx.Ses
 
 	var err error
 	if session != nil {
-		_, err = session.ExecCtx(ctx, statement, data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt, data.Id)
+		_, err = session.ExecCtx(ctx, statement, data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt, data.Id)
 	} else {
-		_, err = m.conn.ExecCtx(ctx, statement, data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt, data.Id)
+		_, err = m.conn.ExecCtx(ctx, statement, data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt, data.Id)
 	}
 	return err
 }
@@ -207,9 +207,9 @@ func (m *defaultTUserSessionsModel) UpdateWithCache(ctx context.Context, session
 		sb.Where(sb.EQ("`id`", nil))
 		statement, _ := sb.Build()
 		if session != nil {
-			return session.ExecCtx(ctx, statement, data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt, data.Id)
+			return session.ExecCtx(ctx, statement, data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt, data.Id)
 		}
-		return conn.ExecCtx(ctx, statement, data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt, data.Id)
+		return conn.ExecCtx(ctx, statement, data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt, data.Id)
 	}, tUserSessionsIdKey)
 	return err
 }
@@ -233,7 +233,7 @@ func (m *customTUserSessionsModel) BulkInsert(ctx context.Context, session sqlx.
 	sb := sqlbuilder.InsertInto(m.table)
 	sb.Cols(tUserSessionsRowsExpectAutoSet)
 	for _, data := range datas {
-		sb.Values(data.SessionTokenId, data.StoryId, data.IsCompleted, data.CompletedAt, data.CreatedAt)
+		sb.Values(data.SessionToken, data.StoryId, data.IsCompleted, data.CompletedAt)
 	}
 	statement, args := sb.Build()
 

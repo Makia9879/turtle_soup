@@ -140,7 +140,14 @@
           "type": "integer",
           "format": "int32"
         },
+        "storyId": {
+          "type": "integer",
+          "format": "int32"
+        },
         "storyTitle": {
+          "type": "string"
+        },
+        "surface": {
           "type": "string"
         }
       },
@@ -149,7 +156,9 @@
         "token",
         "remainingTries",
         "remainingAnswers",
-        "storyTitle"
+        "storyId",
+        "storyTitle",
+        "surface"
       ]
     },
     "SubmitAnswerRequest": {

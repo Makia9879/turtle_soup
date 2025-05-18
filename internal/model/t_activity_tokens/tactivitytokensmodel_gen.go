@@ -22,8 +22,8 @@ import (
 var (
 	tActivityTokensFieldNames          = builder.RawFieldNames(&TActivityTokens{})
 	tActivityTokensRows                = strings.Join(tActivityTokensFieldNames, ",")
-	tActivityTokensRowsExpectAutoSet   = strings.Join(stringx.Remove(tActivityTokensFieldNames, "`id`"), ",")
-	tActivityTokensRowsWithPlaceHolder = strings.Join(stringx.Remove(tActivityTokensFieldNames, "`id`"), "=?,") + "=?"
+	tActivityTokensRowsExpectAutoSet   = strings.Join(stringx.Remove(tActivityTokensFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	tActivityTokensRowsWithPlaceHolder = strings.Join(stringx.Remove(tActivityTokensFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
 	cacheTActivityTokensIdPrefix    = "cache:tActivityTokens:id:"
 	cacheTActivityTokensTokenPrefix = "cache:tActivityTokens:token:"
@@ -217,7 +217,7 @@ func (m *defaultTActivityTokensModel) Insert(ctx context.Context, session sqlx.S
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tActivityTokensRowsExpectAutoSet).
-		Values(data.Token, data.ExpiresAt, data.CreatedAt).Build()
+		Values(data.Token, data.ExpiresAt).Build()
 	if session != nil {
 		return session.ExecCtx(ctx, statement, args...)
 	}
@@ -230,7 +230,7 @@ func (m *defaultTActivityTokensModel) InsertWithCache(ctx context.Context, sessi
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tActivityTokensRowsExpectAutoSet).
-		Values(data.Token, data.ExpiresAt, data.CreatedAt).Build()
+		Values(data.Token, data.ExpiresAt).Build()
 	return m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		if session != nil {
 			return session.ExecCtx(ctx, statement, args...)
@@ -251,9 +251,9 @@ func (m *defaultTActivityTokensModel) Update(ctx context.Context, session sqlx.S
 
 	var err error
 	if session != nil {
-		_, err = session.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.CreatedAt, newData.Id)
+		_, err = session.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.Id)
 	} else {
-		_, err = m.conn.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.CreatedAt, newData.Id)
+		_, err = m.conn.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.Id)
 	}
 	return err
 }
@@ -276,9 +276,9 @@ func (m *defaultTActivityTokensModel) UpdateWithCache(ctx context.Context, sessi
 		sb.Where(sb.EQ("`id`", nil))
 		statement, _ := sb.Build()
 		if session != nil {
-			return session.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.CreatedAt, newData.Id)
+			return session.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.Id)
 		}
-		return conn.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.CreatedAt, newData.Id)
+		return conn.ExecCtx(ctx, statement, newData.Token, newData.ExpiresAt, newData.Id)
 	}, tActivityTokensIdKey, tActivityTokensTokenKey)
 	return err
 }
@@ -302,7 +302,7 @@ func (m *customTActivityTokensModel) BulkInsert(ctx context.Context, session sql
 	sb := sqlbuilder.InsertInto(m.table)
 	sb.Cols(tActivityTokensRowsExpectAutoSet)
 	for _, data := range datas {
-		sb.Values(data.Token, data.ExpiresAt, data.CreatedAt)
+		sb.Values(data.Token, data.ExpiresAt)
 	}
 	statement, args := sb.Build()
 

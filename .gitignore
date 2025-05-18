@@ -43,3 +43,4 @@ etc.yaml
 *.pid
 turtle_soup_go
 example/
+stories.json

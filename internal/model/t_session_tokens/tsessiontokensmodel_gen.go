@@ -22,8 +22,8 @@ import (
 var (
 	tSessionTokensFieldNames          = builder.RawFieldNames(&TSessionTokens{})
 	tSessionTokensRows                = strings.Join(tSessionTokensFieldNames, ",")
-	tSessionTokensRowsExpectAutoSet   = strings.Join(stringx.Remove(tSessionTokensFieldNames, "`id`"), ",")
-	tSessionTokensRowsWithPlaceHolder = strings.Join(stringx.Remove(tSessionTokensFieldNames, "`id`"), "=?,") + "=?"
+	tSessionTokensRowsExpectAutoSet   = strings.Join(stringx.Remove(tSessionTokensFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	tSessionTokensRowsWithPlaceHolder = strings.Join(stringx.Remove(tSessionTokensFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
 	cacheTSessionTokensIdPrefix    = "cache:tSessionTokens:id:"
 	cacheTSessionTokensTokenPrefix = "cache:tSessionTokens:token:"
@@ -58,12 +58,12 @@ type (
 	}
 
 	TSessionTokens struct {
-		Id                uint64        `db:"id"`
-		Token             string        `db:"token"`
-		ActivityTokenId   sql.NullInt64 `db:"activity_token_id"`
-		RemainingAttempts int64         `db:"remaining_attempts"`
-		RemainingAnswers  int64         `db:"remaining_answers"`
-		CreatedAt         time.Time     `db:"created_at"`
+		Id                uint64    `db:"id"`
+		Token             string    `db:"token"`
+		ActivityToken     string    `db:"activity_token"`
+		RemainingAttempts int64     `db:"remaining_attempts"`
+		RemainingAnswers  int64     `db:"remaining_answers"`
+		CreatedAt         time.Time `db:"created_at"`
 	}
 )
 
@@ -219,7 +219,7 @@ func (m *defaultTSessionTokensModel) Insert(ctx context.Context, session sqlx.Se
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tSessionTokensRowsExpectAutoSet).
-		Values(data.Token, data.ActivityTokenId, data.RemainingAttempts, data.RemainingAnswers, data.CreatedAt).Build()
+		Values(data.Token, data.ActivityToken, data.RemainingAttempts, data.RemainingAnswers).Build()
 	if session != nil {
 		return session.ExecCtx(ctx, statement, args...)
 	}
@@ -232,7 +232,7 @@ func (m *defaultTSessionTokensModel) InsertWithCache(ctx context.Context, sessio
 	statement, args := sqlbuilder.NewInsertBuilder().
 		InsertInto(m.table).
 		Cols(tSessionTokensRowsExpectAutoSet).
-		Values(data.Token, data.ActivityTokenId, data.RemainingAttempts, data.RemainingAnswers, data.CreatedAt).Build()
+		Values(data.Token, data.ActivityToken, data.RemainingAttempts, data.RemainingAnswers).Build()
 	return m.cachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		if session != nil {
 			return session.ExecCtx(ctx, statement, args...)
@@ -253,9 +253,9 @@ func (m *defaultTSessionTokensModel) Update(ctx context.Context, session sqlx.Se
 
 	var err error
 	if session != nil {
-		_, err = session.ExecCtx(ctx, statement, newData.Token, newData.ActivityTokenId, newData.RemainingAttempts, newData.RemainingAnswers, newData.CreatedAt, newData.Id)
+		_, err = session.ExecCtx(ctx, statement, newData.Token, newData.ActivityToken, newData.RemainingAttempts, newData.RemainingAnswers, newData.Id)
 	} else {
-		_, err = m.conn.ExecCtx(ctx, statement, newData.Token, newData.ActivityTokenId, newData.RemainingAttempts, newData.RemainingAnswers, newData.CreatedAt, newData.Id)
+		_, err = m.conn.ExecCtx(ctx, statement, newData.Token, newData.ActivityToken, newData.RemainingAttempts, newData.RemainingAnswers, newData.Id)
 	}
 	return err
 }
@@ -278,9 +278,9 @@ func (m *defaultTSessionTokensModel) UpdateWithCache(ctx context.Context, sessio
 		sb.Where(sb.EQ("`id`", nil))
 		statement, _ := sb.Build()
 		if session != nil {
-			return session.ExecCtx(ctx, statement, newData.Token, newData.ActivityTokenId, newData.RemainingAttempts, newData.RemainingAnswers, newData.CreatedAt, newData.Id)
+			return session.ExecCtx(ctx, statement, newData.Token, newData.ActivityToken, newData.RemainingAttempts, newData.RemainingAnswers, newData.Id)
 		}
-		return conn.ExecCtx(ctx, statement, newData.Token, newData.ActivityTokenId, newData.RemainingAttempts, newData.RemainingAnswers, newData.CreatedAt, newData.Id)
+		return conn.ExecCtx(ctx, statement, newData.Token, newData.ActivityToken, newData.RemainingAttempts, newData.RemainingAnswers, newData.Id)
 	}, tSessionTokensIdKey, tSessionTokensTokenKey)
 	return err
 }
@@ -304,7 +304,7 @@ func (m *customTSessionTokensModel) BulkInsert(ctx context.Context, session sqlx
 	sb := sqlbuilder.InsertInto(m.table)
 	sb.Cols(tSessionTokensRowsExpectAutoSet)
 	for _, data := range datas {
-		sb.Values(data.Token, data.ActivityTokenId, data.RemainingAttempts, data.RemainingAnswers, data.CreatedAt)
+		sb.Values(data.Token, data.ActivityToken, data.RemainingAttempts, data.RemainingAnswers)
 	}
 	statement, args := sb.Build()
 

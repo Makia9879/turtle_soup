@@ -1,10 +1,25 @@
 version: '3'
 
 tasks:
+  run:build:
+    desc: 构建
+    cmds:
+      - go mod tidy
+      - go build -o turtle_soup_go main.go
   run:local:
     desc: 本地运行服务
     cmds:
       - ./stop.sh
-      - go build -o turtle_soup_go main.go
+      - task: run:build
       - chmod a+x turtle_soup_go
       - ./start.sh
+  dev:rebuild:db:
+    desc: 重建数据库
+    cmds:
+      -  jzero migrate down
+      -  jzero migrate up
+  dev:rebuild:model:
+    desc: 重建模型
+    cmds:
+      -  task: dev:rebuild:db
+      -  JZERO_GEN_MODEL_MYSQL_DATASOURCE=true jzero gen
