@@ -1,0 +1,33 @@
+rest:
+    name: turtle-soup-api
+    host: 0.0.0.0
+    port: 8001
+
+log:
+    encoding: json
+    mode: file
+    path: logs
+    level: debug
+    serviceName: turtle-soup
+    keepDays: 7
+    compress: true
+
+mysql:
+    db_name: turtle_soup
+    username: turtle_soup
+    password: WSijURlVdgWOvvuxADdhM5sXtT3J
+    ip: mysql
+    port: 3306
+
+redis:
+    host: redis:6379
+    pass: ""  # 如果有密码需要设置
+    db: 0     # 默认数据库
+
+
+activeTokenExpire: 3600  # 秒
+sessionTokenExpire: 1200  # 秒
+# 默认最多参与次数
+defaultRemainingTries: 3  # 次
+# 默认最多回答次数
+defaultRemainingAnswers: 10 # 次

@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  init_mysql:
+    image: mysql:8.0
+    container_name: init_mysql
+    profiles: ["init_app"]
+    depends_on:
+      - mysql
+    volumes:
+      - "./desc:/desc"
+    working_dir: /desc
+    command: >
+      sh -c 'while ! mysqladmin ping -hmysql --silent; do sleep 1; done;
+      mysql -hmysql -uroot -p$$MYSQL_ROOT_PASSWORD < /desc/sql_migration/.init.down.sql;
+      mysql -hmysql -uroot -p$$MYSQL_ROOT_PASSWORD < /desc/sql_migration/.init.up.sql'
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin@123
+    restart: on-failure
+
+  init_app_db:
+    image: ghcr.io/jzero-io/jzero:latest
+    container_name: init_app_db
+    profiles: ["init_app"]
+    working_dir: /app
+    volumes:
+      - "./.jzero.docker.yaml:/app/.jzero.yaml"
+      - "./etc/:/app/etc"
+      - "./desc/:/app/desc"
+    command: migrate up
+    depends_on:
+      - mysql
+      - redis
+    restart: on-failure
+
+  init_app:
+    build: .
+    container_name: init_app
+    profiles: ["init_app"]
+    volumes:
+      - "./etc/etc.docker.yaml:/dist/etc/etc.yaml"
+      - "./desc/:/dist/desc"
+    command: ./app story add
+    depends_on:
+      - mysql
+      - redis
+    restart: on-failure
+
+  app:
+    build: .
+    container_name: app
+    volumes:
+      - "./etc/etc.docker.yaml:/dist/etc/etc.yaml"
+      - "./desc/:/dist/desc/"
+      - "./logs/:/dist/logs/"
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "18001:8001"
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin@123
+      MYSQL_DATABASE: app_db
+    ports:
+      - "127.0.0.1:23306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "127.0.0.1:26379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:
