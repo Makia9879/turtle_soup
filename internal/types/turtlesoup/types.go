@@ -30,15 +30,23 @@ type GetSessionTokenResponse struct {
 	Surface          string `json:"surface"`
 }
 
+type SubmitAnswerMessage struct {
+	Role    string `json:"role"` // 枚举值，用户消息:user; AI消息:assistant
+	Content string `json:"content"`
+}
+
 type SubmitAnswerRequest struct {
-	SessionToken string   `json:"sessionToken"`
-	Messages     []string `json:"messages"` // 聊天记录
+	SessionToken string                `json:"sessionToken"`
+	Messages     []SubmitAnswerMessage `json:"messages"` // 聊天记录
 }
 
 type SubmitAnswerResponse struct {
-	Reply          string `json:"reply"`
-	IsCorrect      bool   `json:"isCorrect"`
-	RemainingTries int    `json:"remainingTries"`
-	StoryAnswer    string `json:"storyAnswer,optional"`   // 仅当解答正确时返回
-	NewStoryTitle  string `json:"newStoryTitle,optional"` // 仅当需要开启新故事时返回
+	Reply            string `json:"reply"`
+	IsCorrect        bool   `json:"isCorrect"`
+	RemainingAnswers int    `json:"remainingAnswers"`       // 剩余回答次数
+	RemainingTries   int    `json:"remainingTries"`         // 剩余游戏次数
+	StoryAnswer      string `json:"storyAnswer,optional"`   // 仅当解答正确时返回
+	NewStoryId       int64  `json:"newStoryId,optional"`    // 仅当需要开启新故事时返回
+	NewStoryTitle    string `json:"newStoryTitle,optional"` // 仅当需要开启新故事时返回
+	NewSurface       string `json:"newSurface,optional"`    // 仅当需要开启新故事时返回
 }

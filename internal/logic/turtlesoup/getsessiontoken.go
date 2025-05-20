@@ -135,11 +135,6 @@ func (l *GetSessionToken) GetSessionToken(req *types.GetSessionTokenRequest) (re
 		l.Logger.Errorf("[GetSessionToken] HmsetCtx() error: %v", err)
 		return nil, err
 	}
-	err = l.svcCtx.RedisConn.ExpireCtx(valCtx, sessionTokenCacheKey, c.SessionTokenExpire)
-	if err != nil {
-		l.Logger.Errorf("[GetSessionToken] ExpireCtx() error: %v", err)
-		return nil, err
-	}
 
 	// 6. 返回响应
 	return &types.GetSessionTokenResponse{

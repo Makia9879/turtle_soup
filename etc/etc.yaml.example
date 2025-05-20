@@ -2,6 +2,7 @@ rest:
     name: turtle-soup-api
     host: 0.0.0.0
     port: 8001
+    timeout: 30000
 
 log:
     encoding: json
@@ -34,4 +35,13 @@ redis:
 
 activeTokenExpire: 3600  # 秒
 sessionTokenExpire: 1200  # 秒
+# 默认最多参与次数
+defaultRemainingTries: 3  # 次
+# 默认最多回答次数
+defaultRemainingAnswers: 10 # 次
+deepSeekApiKey:
+deepSeekModel: deepseek-chat
+deepSeekMaxTokens: 1000000
+deepSeekTemperature: 1.0
 
+systemMessageTpl:

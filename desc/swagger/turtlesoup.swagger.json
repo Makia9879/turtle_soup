@@ -161,6 +161,23 @@
         "surface"
       ]
     },
+    "SubmitAnswerMessage": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "description": " 枚举值，用户消息:user; AI消息:assistant"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "title": "SubmitAnswerMessage",
+      "required": [
+        "role",
+        "content"
+      ]
+    },
     "SubmitAnswerRequest": {
       "type": "object",
       "properties": {
@@ -170,7 +187,7 @@
         "messages": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/SubmitAnswerMessage"
           },
           "description": " 聊天记录"
         }
@@ -191,15 +208,30 @@
           "type": "boolean",
           "format": "boolean"
         },
+        "remainingAnswers": {
+          "type": "integer",
+          "format": "int32",
+          "description": " 剩余回答次数"
+        },
         "remainingTries": {
           "type": "integer",
-          "format": "int32"
+          "format": "int32",
+          "description": " 剩余游戏次数"
         },
         "storyAnswer": {
           "type": "string",
           "description": " 仅当解答正确时返回"
         },
+        "newStoryId": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 仅当需要开启新故事时返回"
+        },
         "newStoryTitle": {
+          "type": "string",
+          "description": " 仅当需要开启新故事时返回"
+        },
+        "newSurface": {
           "type": "string",
           "description": " 仅当需要开启新故事时返回"
         }
@@ -208,6 +240,7 @@
       "required": [
         "reply",
         "isCorrect",
+        "remainingAnswers",
         "remainingTries"
       ]
     }

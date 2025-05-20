@@ -2,18 +2,19 @@ package svc
 
 import (
 	"fmt"
-	"github.com/jzero-io/jzero-contrib/cache"
-	"github.com/zeromicro/go-zero/core/stores/redis"
-	"turtle-soup/internal/errors"
-	"turtle-soup/internal/model"
 
+	"github.com/jzero-io/jzero-contrib/cache"
 	configurator "github.com/zeromicro/go-zero/core/configcenter"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"turtle-soup/internal/config"
 	"turtle-soup/internal/custom"
+	"turtle-soup/internal/errors"
 	"turtle-soup/internal/middleware"
+	"turtle-soup/internal/model"
+	"turtle-soup/pkg/deepseek"
 )
 
 type ServiceContext struct {
@@ -21,10 +22,11 @@ type ServiceContext struct {
 	middleware.Middleware
 	Custom *custom.Custom
 
-	SqlConn   sqlx.SqlConn
-	Model     model.Model
-	Cache     cache.Cache
-	RedisConn *redis.Redis
+	SqlConn        sqlx.SqlConn
+	Model          model.Model
+	Cache          cache.Cache
+	RedisConn      *redis.Redis
+	DeepSeekClient *deepseek.Client
 }
 
 func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceContext {
@@ -40,13 +42,14 @@ func NewServiceContext(cc configurator.Configurator[config.Config]) *ServiceCont
 	cacheIns := cache.NewRedisNode(redisConn, errors.ErrCacheNotFound)
 
 	sc := &ServiceContext{
-		Config:     cc,
-		Custom:     custom.New(),
-		Middleware: middleware.New(),
-		SqlConn:    sqlConn,
-		Model:      model.NewModel(sqlConn),
-		Cache:      cacheIns,
-		RedisConn:  redisConn,
+		Config:         cc,
+		Custom:         custom.New(),
+		Middleware:     middleware.New(),
+		SqlConn:        sqlConn,
+		Model:          model.NewModel(sqlConn),
+		Cache:          cacheIns,
+		RedisConn:      redisConn,
+		DeepSeekClient: deepseek.NewClient(cfg.DeepSeekApiKey),
 	}
 	sc.SetConfigListener()
 	return sc

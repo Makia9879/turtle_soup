@@ -15,10 +15,15 @@ type Config struct {
 	MySQLConf MySQLConf       `json:"mysql,optional"`
 	RedisConf redis.RedisConf `json:"redis,optional"`
 
-	ActiveTokenExpire       int `json:"activeTokenExpire,optional"`
-	SessionTokenExpire      int `json:"sessionTokenExpire,optional"`
-	DefaultRemainingTries   int `json:"defaultRemainingTries,optional"`
-	DefaultRemainingAnswers int `json:"defaultRemainingAnswers,optional"`
+	ActiveTokenExpire       int     `json:"activeTokenExpire,optional"`
+	SessionTokenExpire      int     `json:"sessionTokenExpire,optional"`
+	DefaultRemainingTries   int     `json:"defaultRemainingTries,optional"`
+	DefaultRemainingAnswers int     `json:"defaultRemainingAnswers,optional"`
+	SystemMessageTpl        string  `json:"systemMessageTpl,optional"`
+	DeepSeekApiKey          string  `json:"deepSeekApiKey,optional"`
+	DeepSeekModel           string  `json:"deepSeekModel,optional"`
+	DeepSeekMaxTokens       int     `json:"deepSeekMaxTokens,optional"`
+	DeepSeekTemperature     float64 `json:"deepSeekTemperature,optional"`
 }
 
 type RestConf struct {
