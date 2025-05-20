@@ -11,7 +11,7 @@ tasks:
     cmds:
       - ./stop.sh
       - task: run:build
-      - chmod a+x turtle_soup_go
+      - chmod a+x turtle_soup_go; sleep 1
       - ./start.sh
   dev:rebuild:db:
     desc: 重建数据库
