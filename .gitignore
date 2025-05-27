@@ -40,6 +40,7 @@ dist
 .DS_Store
 .jzero.yaml
 etc.yaml
+etc.docker.yaml
 *.pid
 turtle_soup_go
 example/
