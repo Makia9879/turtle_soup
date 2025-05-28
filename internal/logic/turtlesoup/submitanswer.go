@@ -3,11 +3,11 @@ package turtlesoup
 import (
 	"context"
 	"encoding/json"
-	"github.com/jzero-io/jzero-contrib/condition"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/jzero-io/jzero-contrib/condition"
 	pkgerrors "github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/contextx"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -15,6 +15,7 @@ import (
 
 	"turtle-soup/internal/constant"
 	"turtle-soup/internal/errors"
+	"turtle-soup/internal/model/t_session_tokens"
 	"turtle-soup/internal/model/t_turtle_soup_stories"
 	"turtle-soup/internal/model/t_user_sessions"
 	"turtle-soup/internal/svc"
@@ -115,18 +116,38 @@ func (l *SubmitAnswer) handleNewStoryRequest(valCtx context.Context, sessionToke
 }
 
 func (l *SubmitAnswer) SubmitAnswer(req *types.SubmitAnswerRequest) (resp *types.SubmitAnswerResponse, err error) {
-	// TODO 检查 sessionToken绑定的 activeToken是否过期
 	sessionToken := req.SessionToken
 	messages := req.Messages
 	valCtx := contextx.ValueOnlyFrom(l.ctx)
 	c := l.svcCtx.MustGetConfig()
 
+	// 检查 sessionToken绑定的 activeToken是否过期
+	sessionTokenInfo, err := l.svcCtx.Model.TSessionTokens.FindOneByCondition(valCtx, nil,
+		condition.NewChain().Equal("token", sessionToken).Build()...)
+	if err != nil && pkgerrors.Is(err, t_session_tokens.ErrNotFound) {
+		return nil, errors.ErrSessionTokenNotFound
+	} else if err != nil {
+		l.Logger.Errorf("查找 session token 记录时发生错误: %v", err)
+		return nil, err
+	}
+	activeToken := sessionTokenInfo.ActivityToken
+	activeTokenCacheVal, err := l.svcCtx.RedisConn.GetCtx(valCtx, constant.GetActivityToken(activeToken))
+	if err != nil {
+		l.Logger.Errorf("[GetSessionToken] GetCtx() error: %v", err)
+		return nil, err
+	} else if activeTokenCacheVal == "" {
+		return nil, errors.ErrActiveTokenExpired
+	}
+
 	// 1. 检查redis中的回答次数和尝试次数
 	sessionTokenCacheKey := constant.GetSessionToken(sessionToken)
 	redisData, err := l.svcCtx.RedisConn.HgetallCtx(valCtx, sessionTokenCacheKey)
 	if err != nil {
-		l.Logger.Errorf("[SubmitAnswer] HgetallCtx() error: %v", err)
+		l.Logger.Errorf("[SubmitAnswer] HgetallCtx() error(%s): %v", sessionToken, err)
 		return nil, err
+	} else if len(redisData) == 0 {
+		l.Logger.Errorf("[SubmitAnswer] HgetallCtx() empty redisData(%s)", sessionToken)
+		return nil, errors.ErrSessionTokenNotFound
 	}
 
 	remainingAnswers, _ := strconv.Atoi(redisData["remainingAnswers"])

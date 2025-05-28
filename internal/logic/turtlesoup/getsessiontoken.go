@@ -48,13 +48,12 @@ func (l *GetSessionToken) GetSessionToken(req *types.GetSessionTokenRequest) (re
 	c := l.svcCtx.MustGetConfig()
 
 	// 1. 检查活动token是否有效
-	_, err = l.svcCtx.RedisConn.GetCtx(valCtx, constant.GetActivityToken(req.ActivityToken))
-	if err != nil && pkgerrors.Is(err, errors.ErrCacheNotFound) {
-		l.Logger.Errorf("[GetSessionToken] GetCtx() error: %v", errors.ErrActiveTokenExpired)
-		return nil, errors.ErrActiveTokenExpired
-	} else if err != nil {
+	activeToken, err := l.svcCtx.RedisConn.GetCtx(valCtx, constant.GetActivityToken(req.ActivityToken))
+	if err != nil {
 		l.Logger.Errorf("[GetSessionToken] GetCtx() error: %v", err)
 		return nil, err
+	} else if activeToken == "" {
+		return nil, errors.ErrActiveTokenExpired
 	}
 
 	// 2. 生成sessionToken
