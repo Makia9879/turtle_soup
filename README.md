@@ -115,8 +115,8 @@
 
 ### @GHog
   - Discord @fbjmk97
-  - Github @Makia9879
-  - Twitter @Makia981
+  - Github [@Makia9879](https://github.com/Makia9879)
+  - Twitter [@Makia981](https://x.com/Makia981)
   - EVM network Address：0x26e64ccaf82cecf582c2c4ac537fb7ef4c60507f
 
 ### 特别感谢
