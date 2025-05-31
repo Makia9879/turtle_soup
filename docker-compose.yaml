@@ -38,7 +38,7 @@ services:
     volumes:
       - "./etc/etc.docker.yaml:/dist/etc/etc.yaml"
       - "./desc/:/dist/desc"
-    command: ./app story add
+    command: sh desc/story/init_app.docker.sh
     depends_on:
       - mysql
       - redis
