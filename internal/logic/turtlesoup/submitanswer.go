@@ -3,6 +3,7 @@ package turtlesoup
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -191,12 +192,20 @@ func (l *SubmitAnswer) SubmitAnswer(req *types.SubmitAnswerRequest) (resp *types
 	}
 	systemMsg := types.SubmitAnswerMessage{
 		Role:    "user",
-		Content: c.SystemMessageTpl + "\n\n现在游戏开始，海龟汤的故事为" + storyContent,
+		Content: c.SystemMessageTpl + storyContent + "\n请你立刻以主持人的身份开始游戏，并只展示“汤面”，不显示汤底，等待玩家开始提问。",
 	}
 	firstAssMsg := types.SubmitAnswerMessage{
-		Role:    "assistant",
-		Content: "好的，请开始你的回答，接下来我只会回答 `是`/`不是`/`不相关`",
+		Role: "assistant",
+		Content: fmt.Sprintf(`（主持人模式启动）
+汤面：
+%s
+——
+请开始提问、猜测或直接公布答案！
+（记住：我只能回答“是”“不是”或“不重要”哦）`, storyContentObj.Surface),
 	}
+	lastMsg := messages[len(messages)-1].Content
+	lastMsg = lastMsg + "\n以上，我的推理如果完全正确，请恭喜我完成游戏"
+	messages[len(messages)-1].Content = lastMsg
 	messages = append([]types.SubmitAnswerMessage{systemMsg, firstAssMsg}, messages...)
 
 	// 5. 调用deepseek API处理消息

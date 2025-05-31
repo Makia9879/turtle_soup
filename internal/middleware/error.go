@@ -8,6 +8,6 @@ func ErrorMiddleware(err error) (int, any) {
 	return http.StatusOK, Body{
 		Data:    nil,
 		Code:    http.StatusInternalServerError,
-		Message: "Internal Server Error",
+		Message: err.Error(),
 	}
 }
