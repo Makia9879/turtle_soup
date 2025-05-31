@@ -44,4 +44,5 @@ etc.docker.yaml
 *.pid
 turtle_soup_go
 example/
-stories.json
+desc/story/*.json
+

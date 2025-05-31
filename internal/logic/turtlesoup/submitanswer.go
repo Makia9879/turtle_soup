@@ -158,6 +158,14 @@ func (l *SubmitAnswer) SubmitAnswer(req *types.SubmitAnswerRequest) (resp *types
 	needNewStory := false
 	if remainingAnswers == 0 {
 		if remainingTries == 0 {
+			// 删除session_token缓存
+			defer func() {
+				err := l.deleteSessionToken(sessionToken)
+				if err != nil {
+					logx.WithContext(contextx.ValueOnlyFrom(l.ctx)).Errorf("删除 sessionToken 缓存失败: %v", err)
+					return
+				}
+			}()
 			return nil, errors.ErrNoMoreAttempts
 		}
 		remainingAnswers = c.DefaultRemainingAnswers
@@ -251,6 +259,14 @@ func (l *SubmitAnswer) SubmitAnswer(req *types.SubmitAnswerRequest) (resp *types
 			Equal("session_token", sessionToken).
 			Equal("story_id", curStoryId).Build()...)
 
+	// 删除session_token缓存
+	defer func() {
+		err := l.deleteSessionToken(sessionToken)
+		if err != nil {
+			logx.WithContext(contextx.ValueOnlyFrom(l.ctx)).Errorf("删除 sessionToken 缓存失败: %v", err)
+			return
+		}
+	}()
 	return &types.SubmitAnswerResponse{
 		Reply:            replyStr,
 		RemainingTries:   remainingTries,
@@ -258,4 +274,9 @@ func (l *SubmitAnswer) SubmitAnswer(req *types.SubmitAnswerRequest) (resp *types
 		IsCorrect:        true,
 		StoryAnswer:      storyContentObj.Bottom,
 	}, nil
+}
+
+func (l *SubmitAnswer) deleteSessionToken(sessionToken string) error {
+	_, err := l.svcCtx.RedisConn.DelCtx(contextx.ValueOnlyFrom(l.ctx), constant.GetSessionToken(sessionToken))
+	return err
 }
