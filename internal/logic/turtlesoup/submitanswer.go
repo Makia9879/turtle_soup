@@ -212,7 +212,10 @@ func (l *SubmitAnswer) SubmitAnswer(req *types.SubmitAnswerRequest) (resp *types
 （记住：我只能回答“是”“不是”或“不重要”哦）`, storyContentObj.Surface),
 	}
 	lastMsg := messages[len(messages)-1].Content
-	lastMsg = lastMsg + "\n以上，我的推理如果完全正确，请恭喜我完成游戏"
+	lastMsg = fmt.Sprintf(`玩家的回答是：
+%s
+请判断玩家是否回答正确，如果回答正确请恭喜玩家完成游戏
+`, lastMsg)
 	messages[len(messages)-1].Content = lastMsg
 	messages = append([]types.SubmitAnswerMessage{systemMsg, firstAssMsg}, messages...)
 
